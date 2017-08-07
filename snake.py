@@ -13,14 +13,27 @@ class Food:
         self.pos_y = y
 
 
+class Border:
+
+    def __init__(self,min_x=0,min_y=0,max_x=128,max_y=294):
+        self.min_x = min_x
+        self.min_y = min_y
+        self.max_x = max_x
+        self.max_y = max_y 
+        self.draw_border()
+
+    def draw_border(self):
+        ugfx.box(5, 5, 287, 120, ugfx.BLACK)
+
 class Game:
 
-    def __init__(self,snake):
+    def __init__(self,snake,border):
         self.snake = snake
+        self.border = border
 
     def do_game(self):
         
-        if(self.snake.hits_self() or self.snake.hits_border()):
+        if(self.snake.hits_self() or self.snake.hits_border(self.border)):
             self.snake.game_state = "FAIL"
             return
         if(self.snake.hits_food(self.snake.food) and self.snake.can_hit_target == True):
@@ -49,7 +62,7 @@ class Renderer:
 
 class Snake:
 
-    def __init__(self, started,border,renderer):
+    def __init__(self, started,renderer):
         self.started = started
         self.pointx = 10
         self.pointy = 10
@@ -60,7 +73,6 @@ class Snake:
         self.snake_body = []
         self.can_hit_target = True
         self.score = 0
-        self.border = border
         self.game_state = "INIT"
         self.renderer = renderer
         self.set_random_food()
@@ -112,11 +124,11 @@ class Snake:
         self.snake_body.append([self.pointx,self.pointy])
         self.renderer.render_square(self.pointx,self.pointy) 
 
-    def hits_border(self):
-        foul_left = self.pointx <= 0
-        foul_right = self.pointx >= self.border[1]
-        foul_top = self.pointy <= 0
-        foul_bottom = self.pointy >= self.border[0] 
+    def hits_border(self,border):
+        foul_left = self.pointx <= border.min_x
+        foul_right = self.pointx >= border.max_x
+        foul_top = self.pointy <= border.min_y
+        foul_bottom = self.pointy >= border.max_y 
 
         return foul_left or foul_right or foul_top or foul_bottom
 
@@ -207,9 +219,9 @@ def run_game():
     ugfx.flush()
 
 
-    this_game = Game(Snake(True,[128,294],Renderer())) 
+    this_game = Game(Snake(True,Renderer()),Border()) 
 
-    ugfx.box(5, 5, 287, 120, ugfx.BLACK)
+    # ugfx.box(5, 5, 287, 120, ugfx.BLACK)
 
     ugfx.flush()
 
