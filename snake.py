@@ -97,6 +97,16 @@ class Snake:
 
         return abs_x_diff < 5 and abs_y_diff < 5
 
+    def move(self,move_size):
+        if(self.direction == "LEFT"):
+            self.pointx -= move_size
+        if(self.direction == "RIGHT"):
+            self.pointx += move_size
+        if(self.direction == "UP"):
+            self.pointy -= move_size
+        if(self.direction == "DOWN"):
+            self.pointy += move_size        
+
     def set_random_food(self):
         x,y = randint(10,270),randint(10,110) # not in extreme corners
         food = Food(x,y)
@@ -180,14 +190,7 @@ def FailGame(this_game):
 def Step(this_game,step_size):
     this_game.increment()
     if(this_game.snake.started == True and this_game.snake.should_render(this_game.steps)):
-        if(this_game.snake.direction == "LEFT"):
-            this_game.snake.pointx -= step_size
-        if(this_game.snake.direction == "RIGHT"):
-            this_game.snake.pointx += step_size
-        if(this_game.snake.direction == "UP"):
-            this_game.snake.pointy -= step_size
-        if(this_game.snake.direction == "DOWN"):
-            this_game.snake.pointy += step_size
+        this_game.snake.move(step_size)
         this_game.do_game()
         ugfx.flush()
 
