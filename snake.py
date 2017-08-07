@@ -5,7 +5,6 @@ import time
 import sys
 
 
-
 class Food:
 
     def __init__(self,x,y):
@@ -49,15 +48,18 @@ class Game:
             self.game_state = "FAIL"
             return
         if(self.snake.can_hit_target == True):
-            if(self.snake.hits_food(self.food)):
-                self.snake.length +=2
-                self.snake.increase_speed()
-                self.snake.renderer.clear_square(self.food.pos_x,self.food.pos_y)
-                self.food = Food.create_random_food()
-                self.snake.can_hit_target = False
-                self.snake.score += 1
-                print("Target Hit!!!!")
-        if(self.snake.hits_food(self.food) == True and self.snake.can_hit_target == False):
+            for i in self.food:
+                if(self.snake.hits_food(i)):
+                    self.snake.length +=2
+                    self.snake.increase_speed()
+                    self.snake.renderer.clear_square(i.pos_x,i.pos_y)
+                    self.food.remove(i)
+                    self.food.append(Food.create_random_food())
+                    self.snake.can_hit_target = False
+                    self.snake.score += 1
+                    print("Target Hit!!!!")
+            
+        if(self.snake.hits_any_food(self.food) == True and self.snake.can_hit_target == False):
             self.snake.render_snake()
         else:
             self.snake.can_hit_target = True
@@ -111,6 +113,11 @@ class Snake:
 
         return abs_x_diff < 5 and abs_y_diff < 5
 
+    def hits_any_food(self,food_iter):
+        for i in food_iter:
+            if(self.hits_food(i)):
+                return True
+        return False
     def move(self,move_size):
         if(self.direction == "LEFT"):
             self.pointx -= move_size
@@ -224,7 +231,7 @@ def run_game():
     ugfx.flush()
 
 
-    this_game = Game(Snake(True,Renderer()),Border(),Food.create_random_food()) 
+    this_game = Game(Snake(True,Renderer()),Border(),[Food.create_random_food()]) 
 
     ugfx.flush()
 
