@@ -80,7 +80,7 @@ class Snake:
         self.pointx = 10
         self.pointy = 10
         self.direction = "RIGHT"
-        self.speed = 5000
+        self.speed = 1000
         self.length = 5
         self.snake_body = []
         self.can_hit_target = True
@@ -115,10 +115,10 @@ class Snake:
             self.pointy += move_size        
    
     def increase_speed(self):
-        if(self.speed <= 200):
-            self.speed = 200
+        if(self.speed <= 10):
+            self.speed = 10
         else:
-            self.speed -= 200
+            self.speed -= 10
 
    
     def render_snake(self):
