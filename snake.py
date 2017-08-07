@@ -11,12 +11,19 @@ class Food:
         self.pos_x = x
         self.pos_y = y
 
-    def create_random_food():
+    def create_random_food(snake):
         x,y = randrange(10,270,5),randrange(10,110,5) # not in extreme corners
+        if(Food.hits_snake(snake,x,y)):
+            create_random_food(snake)
         food = Food(x,y)
         ugfx.fill_polygon(x, y, [[10,5],[10,10],[5,10],[5,5]], ugfx.BLACK)
         return food
-         
+
+    def hits_snake(snake,x,y):
+        for i,j in snake.snake_body:
+            if(x == i and y == j):
+                return True
+        return False
 
 class Border:
 
@@ -54,7 +61,7 @@ class Game:
                     self.snake.increase_speed()
                     self.snake.renderer.clear_square(i.pos_x,i.pos_y)
                     self.food.remove(i)
-                    self.food.append(Food.create_random_food())
+                    self.food.append(Food.create_random_food(self.snake))
                     self.snake.can_hit_target = False
                     self.snake.score += 1
                     print("Target Hit!!!!")
@@ -230,8 +237,8 @@ def run_game():
     ugfx.clear(ugfx.WHITE)
     ugfx.flush()
 
-
-    this_game = Game(Snake(True,Renderer()),Border(),[Food.create_random_food()]) 
+    snake = Snake(True,Renderer())
+    this_game = Game(snake,Border(),[Food.create_random_food(snake)]) 
 
     ugfx.flush()
 
