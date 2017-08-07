@@ -38,6 +38,7 @@ class Game:
         self.border = border
         self.steps = 0
         self.food = food
+        self.game_state = "INIT"
 
     def increment(self):
         self.steps +=1
@@ -45,7 +46,7 @@ class Game:
     def do_game(self):
         
         if(self.snake.hits_self() or self.snake.hits_border(self.border)):
-            self.snake.game_state = "FAIL"
+            self.game_state = "FAIL"
             return
         if(self.snake.hits_food(self.food) and self.snake.can_hit_target == True):
             self.snake.length +=2
@@ -83,7 +84,6 @@ class Snake:
         self.snake_body = []
         self.can_hit_target = True
         self.score = 0
-        self.game_state = "INIT"
         self.renderer = renderer
 
     def should_render(self,steps):
@@ -231,7 +231,7 @@ def run_game():
     print("Start Log")
 
     while True:
-        if(this_game.snake.game_state == "FAIL"):
+        if(this_game.game_state == "FAIL"):
             FailGame(this_game)
         Step(this_game,5)
 
