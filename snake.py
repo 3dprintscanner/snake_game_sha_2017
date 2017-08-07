@@ -14,7 +14,7 @@ class Food:
     def create_random_food(snake):
         x,y = randrange(10,270,5),randrange(10,110,5) # not in extreme corners
         if(Food.hits_snake(snake,x,y)):
-            create_random_food(snake)
+            Food.create_random_food(snake)
         food = Food(x,y)
         ugfx.fill_polygon(x, y, [[10,5],[10,10],[5,10],[5,5]], ugfx.BLACK)
         return food
