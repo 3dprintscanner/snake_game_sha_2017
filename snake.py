@@ -1,6 +1,6 @@
 import badge
 import ugfx
-from random import randint
+from random import randrange
 import time
 import sys
 
@@ -13,7 +13,7 @@ class Food:
         self.pos_y = y
 
     def create_random_food():
-        x,y = randint(10,270),randint(10,110) # not in extreme corners
+        x,y = randrange(10,270,5),randrange(10,110,5) # not in extreme corners
         food = Food(x,y)
         ugfx.fill_polygon(x, y, [[10,5],[10,10],[5,10],[5,5]], ugfx.BLACK)
         return food
@@ -48,14 +48,15 @@ class Game:
         if(self.snake.hits_self() or self.snake.hits_border(self.border)):
             self.game_state = "FAIL"
             return
-        if(self.snake.hits_food(self.food) and self.snake.can_hit_target == True):
-            self.snake.length +=2
-            self.snake.increase_speed()
-            self.snake.renderer.clear_square(self.food.pos_x,self.food.pos_y)
-            self.food = Food.create_random_food()
-            self.snake.can_hit_target = False
-            self.snake.score += 1
-            print("Target Hit!!!!")
+        if(self.snake.can_hit_target == True):
+            if(self.snake.hits_food(self.food)):
+                self.snake.length +=2
+                self.snake.increase_speed()
+                self.snake.renderer.clear_square(self.food.pos_x,self.food.pos_y)
+                self.food = Food.create_random_food()
+                self.snake.can_hit_target = False
+                self.snake.score += 1
+                print("Target Hit!!!!")
         if(self.snake.hits_food(self.food) == True and self.snake.can_hit_target == False):
             self.snake.render_snake()
         else:
