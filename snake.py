@@ -5,6 +5,14 @@ import time
 import sys
 
 
+
+class Food:
+
+    def __init__(self,x,y):
+        self.pos_x = x
+        self.pos_y = y
+
+
 class Renderer:
 
     def render_square(self,pointx,pointy):
@@ -24,13 +32,13 @@ class Game:
         self.steps = 0
         self.speed = 5000
         self.length = 5
-        self.render_targets = []
+        self.snake_body = []
         self.can_hit_target = True
         self.score = 0
         self.border = border
         self.game_state = "INIT"
         self.renderer = renderer
-        self.set_random_target()
+        self.set_random_food()
 
     def should_render(self):
         return self.steps % self.speed == 0 
@@ -51,24 +59,12 @@ class Game:
 
         return abs_x_diff < 5 and abs_y_diff < 5
 
-    def hits_target(self):
-        
-        abspointx = abs(self.pointx)
-        abstargetx = abs(self.targetx)
-        abspointy = abs(self.pointy)
-        abstargety = abs(self.targety)
-        absxdiff =  abs(abspointx - abstargetx)
-        absydiff = abs(abspointy - abstargety)
-        return absxdiff < 5 and absydiff < 5
-
-    def create_target(self,targetx,targety):
-        self.renderer.render_square(targetx,targety)
-        return targetx,targety
-
-    def set_random_target(self):
+    def set_random_food(self):
         x,y = randint(10,270),randint(10,110) # not in extreme corners
-        self.targetx = x
-        self.targety = y
+        food = Food(x,y)
+        self.targetx = food.pos_x
+        self.targety = food.pos_y
+        self.food = food
         self.renderer.render_square(x,y)
 
    
@@ -81,14 +77,14 @@ class Game:
    
     def render_snake(self):
         # checkif the move buffer is above the length of the snake
-        if(len(self.render_targets) > self.length):
-            difference = len(self.render_targets) - self.length
-            render_targets_to_remove = self.render_targets[:difference]
+        if(len(self.snake_body) > self.length):
+            difference = len(self.snake_body) - self.length
+            render_targets_to_remove = self.snake_body[:difference]
             # render the tail as white and remove from snake pos list
             for i,j in render_targets_to_remove:
                 self.renderer.clear_square(i,j)
-                self.render_targets.pop(0)
-        self.render_targets.append([self.pointx,self.pointy])
+                self.snake_body.pop(0)
+        self.snake_body.append([self.pointx,self.pointy])
         self.renderer.render_square(self.pointx,self.pointy) 
 
     def hits_border(self):
@@ -101,7 +97,7 @@ class Game:
 
     def hits_self(self):
         # checks whether the next step would hit the existing area
-        for x,y in self.render_targets:
+        for x,y in self.snake_body:
             abspointx = abs(self.pointx)
             abstargetx = abs(x)
             abspointy = abs(self.pointy)
@@ -119,15 +115,15 @@ class Game:
         if(self.hits_self() or self.hits_border()):
             self.game_state = "FAIL"
             return
-        if(self.hits_target() and self.can_hit_target == True):
+        if(self.hits_food(self.food) and self.can_hit_target == True):
             self.length +=2
             self.increase_speed()
             self.renderer.clear_square(self.targetx,self.targety)
-            self.set_random_target()
+            self.set_random_food()
             self.can_hit_target = False
             self.score += 1
             print("Target Hit!!!!")
-        if(self.hits_target() == True and self.can_hit_target == False):
+        if(self.hits_food(self.food) == True and self.can_hit_target == False):
             self.render_snake()
         else:
             self.can_hit_target = True
