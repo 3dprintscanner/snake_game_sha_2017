@@ -12,10 +12,16 @@ class Food:
         self.pos_x = x
         self.pos_y = y
 
+    def create_random_food():
+        x,y = randint(10,270),randint(10,110) # not in extreme corners
+        food = Food(x,y)
+        ugfx.fill_polygon(x, y, [[10,5],[10,10],[5,10],[5,5]], ugfx.BLACK)
+        return food
+         
 
 class Border:
 
-    def __init__(self,min_x=0,min_y=0,max_x=128,max_y=294):
+    def __init__(self,min_x=0,min_y=0,max_x=294,max_y=128):
         self.min_x = min_x
         self.min_y = min_y
         self.max_x = max_x
@@ -27,10 +33,11 @@ class Border:
 
 class Game:
 
-    def __init__(self,snake,border):
+    def __init__(self,snake,border,food):
         self.snake = snake
         self.border = border
         self.steps = 0
+        self.food = food
 
     def increment(self):
         self.steps +=1
@@ -40,15 +47,15 @@ class Game:
         if(self.snake.hits_self() or self.snake.hits_border(self.border)):
             self.snake.game_state = "FAIL"
             return
-        if(self.snake.hits_food(self.snake.food) and self.snake.can_hit_target == True):
+        if(self.snake.hits_food(self.food) and self.snake.can_hit_target == True):
             self.snake.length +=2
             self.snake.increase_speed()
-            self.snake.renderer.clear_square(self.snake.food.pos_x,self.snake.food.pos_y)
-            self.snake.set_random_food()
+            self.snake.renderer.clear_square(self.food.pos_x,self.food.pos_y)
+            self.food = Food.create_random_food()
             self.snake.can_hit_target = False
             self.snake.score += 1
             print("Target Hit!!!!")
-        if(self.snake.hits_food(self.snake.food) == True and self.snake.can_hit_target == False):
+        if(self.snake.hits_food(self.food) == True and self.snake.can_hit_target == False):
             self.snake.render_snake()
         else:
             self.snake.can_hit_target = True
@@ -78,7 +85,6 @@ class Snake:
         self.score = 0
         self.game_state = "INIT"
         self.renderer = renderer
-        self.set_random_food()
 
     def should_render(self,steps):
         return steps % self.speed == 0 
@@ -106,15 +112,6 @@ class Snake:
             self.pointy -= move_size
         if(self.direction == "DOWN"):
             self.pointy += move_size        
-
-    def set_random_food(self):
-        x,y = randint(10,270),randint(10,110) # not in extreme corners
-        food = Food(x,y)
-        self.targetx = food.pos_x
-        self.targety = food.pos_y
-        self.food = food
-        self.renderer.render_square(x,y)
-
    
     def increase_speed(self):
         if(self.speed <= 200):
@@ -141,7 +138,9 @@ class Snake:
         foul_top = self.pointy <= border.min_y
         foul_bottom = self.pointy >= border.max_y 
 
-        return foul_left or foul_right or foul_top or foul_bottom
+        hits =  foul_left or foul_right or foul_top or foul_bottom
+        # print(hits)
+        return hits
 
     def hits_self(self):
         # checks whether the next step would hit the existing area
@@ -223,7 +222,7 @@ def run_game():
     ugfx.flush()
 
 
-    this_game = Game(Snake(True,Renderer()),Border()) 
+    this_game = Game(Snake(True,Renderer()),Border(),Food.create_random_food()) 
 
     # ugfx.box(5, 5, 287, 120, ugfx.BLACK)
 
