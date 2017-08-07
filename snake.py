@@ -4,7 +4,6 @@ from random import randint
 import time
 import sys
 
-
 class Game:
 
     def __init__(self, started,border):
@@ -13,8 +12,8 @@ class Game:
         self.pointy = 10
         self.direction = "RIGHT"
         self.steps = 0
-        self.speed = 20000
-        self.length = 25
+        self.speed = 5000
+        self.length = 5
         self.render_targets = []
         self.can_hit_target = True
         self.score = 0
@@ -27,6 +26,20 @@ class Game:
     def increment(self):
         self.steps +=1 
     
+
+    def hits_food(self,food):
+
+        abspointx = abs(self.pointx)
+        abspointy = abs(self.pointy)
+
+        absfoodx = abs(food.pos_x)
+        absfoody = abs(food.pos_y) 
+
+        abs_x_diff = abs(abspointx - absfoodx)
+        abs_y_diff = abs(abspointy - absfoody)
+
+        return abs_x_diff < 5 and abs_y_diff < 5
+
     def hits_target(self):
         
         abspointx = abs(self.pointx)
@@ -42,7 +55,7 @@ class Game:
         return targetx,targety
 
     def set_random_target(self):
-        x,y = randint(0,275),randint(0,110)
+        x,y = randint(10,270),randint(10,110) # not in extreme corners
         self.targetx = x
         self.targety = y
         self.render_square(x,y)
@@ -50,6 +63,11 @@ class Game:
     def render_square(self,pointx,pointy):
         ugfx.fill_polygon(pointx, pointy, [[10,5],[10,10],[5,10],[5,5]], ugfx.BLACK)
 
+    def increase_speed(self):
+        if(self.speed <= 200):
+            self.speed = 200
+        else:
+            self.speed -= 200
 
     def clear_square(self,pointx,pointy):
         ugfx.fill_polygon(pointx, pointy, [[10,5],[10,10],[5,10],[5,5]], ugfx.WHITE)
@@ -96,8 +114,8 @@ class Game:
             self.game_state = "FAIL"
             return
         if(self.hits_target() and self.can_hit_target == True):
-            self.length +=10
-            self.speed -= 500
+            self.length +=2
+            self.increase_speed()
             self.clear_square(self.targetx,self.targety)
             self.set_random_target()
             self.can_hit_target = False
@@ -126,9 +144,15 @@ def right(pressed,this_game):
     if(pressed == True):
         this_game.direction = "RIGHT"
 
+def exit_game(pressed,this_game):
+    if(pressed == True):
+        sys.exit(0)
+
+
 def FailGame(this_game):
     ugfx.clear(ugfx.WHITE)
     ugfx.string(20,50,"Game Over - Score: {}".format(this_game.score),"PermanentMarker22",ugfx.BLACK)
+    ugfx.flush()
     time.sleep(5)
     sys.exit(0)
 
@@ -144,6 +168,7 @@ def Step(this_game,step_size):
         if(this_game.direction == "DOWN"):
             this_game.pointy = this_game.pointy +step_size
         this_game.do_game()
+        ugfx.flush()
 
 
 
@@ -164,24 +189,34 @@ def run_game():
     ugfx.input_attach(ugfx.JOY_DOWN, lambda pressed: down(pressed,this_game))
     ugfx.input_attach(ugfx.JOY_LEFT, lambda pressed: left(pressed,this_game))
     ugfx.input_attach(ugfx.JOY_RIGHT, lambda pressed: right(pressed,this_game))
-    # ugfx.input_attach(ugfx.BTN_A, lambda pressed: start(pressed,this_game))
+    ugfx.input_attach(ugfx.BTN_SELECT, lambda pressed: exit_game(pressed,this_game))
 
     ugfx.string(50,50,"Snake Game","PermanentMarker22",ugfx.BLACK)
+    ugfx.string(50,72,"press SELECT to exit","Roboto_Regular18",ugfx.BLACK)
+    ugfx.flush()
     time.sleep(5)
     ugfx.clear(ugfx.WHITE)
+    ugfx.flush()
+
 
     this_game = Game(True,[128,294]) 
 
     ugfx.box(5, 5, 287, 120, ugfx.BLACK)
 
+    ugfx.flush()
+
     print("Start Log")
-
-
-
 
     while True:
         if(this_game.game_state == "FAIL"):
             FailGame(this_game)
-        Step(this_game,2)
+        Step(this_game,5)
 
 run_game()
+
+# how to make this run with multiple snakes???? 
+
+
+# move position of target out of the snake and represent with a diff class
+# each round consider the renders, plus look at the buffers to see whether one snake kills another
+# how can this be done over a network??? tcp socket??
