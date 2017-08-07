@@ -13,6 +13,31 @@ class Food:
         self.pos_y = y
 
 
+class Game:
+
+    def __init__(self,snake):
+        self.snake = snake
+
+    def do_game(self):
+        
+        if(self.snake.hits_self() or self.snake.hits_border()):
+            self.snake.game_state = "FAIL"
+            return
+        if(self.snake.hits_food(self.snake.food) and self.snake.can_hit_target == True):
+            self.snake.length +=2
+            self.snake.increase_speed()
+            self.snake.renderer.clear_square(self.snake.food.pos_x,self.snake.food.pos_y)
+            self.snake.set_random_food()
+            self.snake.can_hit_target = False
+            self.snake.score += 1
+            print("Target Hit!!!!")
+        if(self.snake.hits_food(self.snake.food) == True and self.snake.can_hit_target == False):
+            self.snake.render_snake()
+        else:
+            self.snake.can_hit_target = True
+            self.snake.render_snake()
+
+
 class Renderer:
 
     def render_square(self,pointx,pointy):
@@ -22,7 +47,7 @@ class Renderer:
         ugfx.fill_polygon(pointx, pointy, [[10,5],[10,10],[5,10],[5,5]], ugfx.WHITE)
 
 
-class Game:
+class Snake:
 
     def __init__(self, started,border,renderer):
         self.started = started
@@ -108,43 +133,24 @@ class Game:
             if(hits == True):
                 return True
         return False
-
-
-    def do_game(self):
-        
-        if(self.hits_self() or self.hits_border()):
-            self.game_state = "FAIL"
-            return
-        if(self.hits_food(self.food) and self.can_hit_target == True):
-            self.length +=2
-            self.increase_speed()
-            self.renderer.clear_square(self.targetx,self.targety)
-            self.set_random_food()
-            self.can_hit_target = False
-            self.score += 1
-            print("Target Hit!!!!")
-        if(self.hits_food(self.food) == True and self.can_hit_target == False):
-            self.render_snake()
-        else:
-            self.can_hit_target = True
-            self.render_snake()
+    
 
 
 def up(pressed,this_game):
     if(pressed == True):
-        this_game.direction = "UP"
+        this_game.snake.direction = "UP"
 
 def down(pressed,this_game):
     if(pressed == True):
-        this_game.direction = "DOWN"
+        this_game.snake.direction = "DOWN"
 
 def left(pressed, this_game):
     if(pressed == True):
-        this_game.direction = "LEFT"
+        this_game.snake.direction = "LEFT"
 
 def right(pressed,this_game):
     if(pressed == True):
-        this_game.direction = "RIGHT"
+        this_game.snake.direction = "RIGHT"
 
 def exit_game(pressed,this_game):
     if(pressed == True):
@@ -153,22 +159,22 @@ def exit_game(pressed,this_game):
 
 def FailGame(this_game):
     ugfx.clear(ugfx.WHITE)
-    ugfx.string(20,50,"Game Over - Score: {}".format(this_game.score),"PermanentMarker22",ugfx.BLACK)
+    ugfx.string(20,50,"Game Over - Score: {}".format(this_game.snake.score),"PermanentMarker22",ugfx.BLACK)
     ugfx.flush()
     time.sleep(5)
     sys.exit(0)
 
 def Step(this_game,step_size):
-    this_game.increment()
-    if(this_game.started == True and this_game.should_render()):
-        if(this_game.direction == "LEFT"):
-            this_game.pointx = this_game.pointx -step_size
-        if(this_game.direction == "RIGHT"):
-            this_game.pointx = this_game.pointx +step_size
-        if(this_game.direction == "UP"):
-            this_game.pointy = this_game.pointy -step_size
-        if(this_game.direction == "DOWN"):
-            this_game.pointy = this_game.pointy +step_size
+    this_game.snake.increment()
+    if(this_game.snake.started == True and this_game.snake.should_render()):
+        if(this_game.snake.direction == "LEFT"):
+            this_game.snake.pointx -= step_size
+        if(this_game.snake.direction == "RIGHT"):
+            this_game.snake.pointx += step_size
+        if(this_game.snake.direction == "UP"):
+            this_game.snake.pointy -= step_size
+        if(this_game.snake.direction == "DOWN"):
+            this_game.snake.pointy += step_size
         this_game.do_game()
         ugfx.flush()
 
@@ -201,7 +207,7 @@ def run_game():
     ugfx.flush()
 
 
-    this_game = Game(True,[128,294],Renderer()) 
+    this_game = Game(Snake(True,[128,294],Renderer())) 
 
     ugfx.box(5, 5, 287, 120, ugfx.BLACK)
 
@@ -210,7 +216,7 @@ def run_game():
     print("Start Log")
 
     while True:
-        if(this_game.game_state == "FAIL"):
+        if(this_game.snake.game_state == "FAIL"):
             FailGame(this_game)
         Step(this_game,5)
 
