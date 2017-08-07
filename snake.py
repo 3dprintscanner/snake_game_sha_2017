@@ -4,9 +4,19 @@ from random import randint
 import time
 import sys
 
+
+class Renderer:
+
+    def render_square(self,pointx,pointy):
+        ugfx.fill_polygon(pointx, pointy, [[10,5],[10,10],[5,10],[5,5]], ugfx.BLACK)
+
+    def clear_square(self,pointx,pointy):
+        ugfx.fill_polygon(pointx, pointy, [[10,5],[10,10],[5,10],[5,5]], ugfx.WHITE)
+
+
 class Game:
 
-    def __init__(self, started,border):
+    def __init__(self, started,border,renderer):
         self.started = started
         self.pointx = 10
         self.pointy = 10
@@ -17,9 +27,10 @@ class Game:
         self.render_targets = []
         self.can_hit_target = True
         self.score = 0
-        self.set_random_target()
         self.border = border
         self.game_state = "INIT"
+        self.renderer = renderer
+        self.set_random_target()
 
     def should_render(self):
         return self.steps % self.speed == 0 
@@ -51,28 +62,23 @@ class Game:
         return absxdiff < 5 and absydiff < 5
 
     def create_target(self,targetx,targety):
-        self.render_square(targetx,targety)
+        self.renderer.render_square(targetx,targety)
         return targetx,targety
 
     def set_random_target(self):
         x,y = randint(10,270),randint(10,110) # not in extreme corners
         self.targetx = x
         self.targety = y
-        self.render_square(x,y)
+        self.renderer.render_square(x,y)
 
-    def render_square(self,pointx,pointy):
-        ugfx.fill_polygon(pointx, pointy, [[10,5],[10,10],[5,10],[5,5]], ugfx.BLACK)
-
+   
     def increase_speed(self):
         if(self.speed <= 200):
             self.speed = 200
         else:
             self.speed -= 200
 
-    def clear_square(self,pointx,pointy):
-        ugfx.fill_polygon(pointx, pointy, [[10,5],[10,10],[5,10],[5,5]], ugfx.WHITE)
-
-
+   
     def render_snake(self):
         # checkif the move buffer is above the length of the snake
         if(len(self.render_targets) > self.length):
@@ -80,10 +86,10 @@ class Game:
             render_targets_to_remove = self.render_targets[:difference]
             # render the tail as white and remove from snake pos list
             for i,j in render_targets_to_remove:
-                self.clear_square(i,j)
+                self.renderer.clear_square(i,j)
                 self.render_targets.pop(0)
         self.render_targets.append([self.pointx,self.pointy])
-        self.render_square(self.pointx,self.pointy) 
+        self.renderer.render_square(self.pointx,self.pointy) 
 
     def hits_border(self):
         foul_left = self.pointx <= 0
@@ -116,7 +122,7 @@ class Game:
         if(self.hits_target() and self.can_hit_target == True):
             self.length +=2
             self.increase_speed()
-            self.clear_square(self.targetx,self.targety)
+            self.renderer.clear_square(self.targetx,self.targety)
             self.set_random_target()
             self.can_hit_target = False
             self.score += 1
@@ -199,7 +205,7 @@ def run_game():
     ugfx.flush()
 
 
-    this_game = Game(True,[128,294]) 
+    this_game = Game(True,[128,294],Renderer()) 
 
     ugfx.box(5, 5, 287, 120, ugfx.BLACK)
 
