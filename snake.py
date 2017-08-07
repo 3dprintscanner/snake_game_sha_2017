@@ -30,7 +30,11 @@ class Game:
     def __init__(self,snake,border):
         self.snake = snake
         self.border = border
+        self.steps = 0
 
+    def increment(self):
+        self.steps +=1
+    
     def do_game(self):
         
         if(self.snake.hits_self() or self.snake.hits_border(self.border)):
@@ -67,7 +71,6 @@ class Snake:
         self.pointx = 10
         self.pointy = 10
         self.direction = "RIGHT"
-        self.steps = 0
         self.speed = 5000
         self.length = 5
         self.snake_body = []
@@ -77,11 +80,9 @@ class Snake:
         self.renderer = renderer
         self.set_random_food()
 
-    def should_render(self):
-        return self.steps % self.speed == 0 
-    def increment(self):
-        self.steps +=1 
-    
+    def should_render(self,steps):
+        return steps % self.speed == 0 
+
 
     def hits_food(self,food):
 
@@ -177,8 +178,8 @@ def FailGame(this_game):
     sys.exit(0)
 
 def Step(this_game,step_size):
-    this_game.snake.increment()
-    if(this_game.snake.started == True and this_game.snake.should_render()):
+    this_game.increment()
+    if(this_game.snake.started == True and this_game.snake.should_render(this_game.steps)):
         if(this_game.snake.direction == "LEFT"):
             this_game.snake.pointx -= step_size
         if(this_game.snake.direction == "RIGHT"):
