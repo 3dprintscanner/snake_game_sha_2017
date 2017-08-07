@@ -62,6 +62,13 @@ class Game:
         else:
             self.snake.can_hit_target = True
             self.snake.render_snake()
+    
+    def run_step(self,step_size):
+        self.increment()
+        if(self.snake.started == True and self.snake.should_render(self.steps)):
+            self.snake.move(step_size)
+            self.do_game()
+            ugfx.flush()
 
 
 class Renderer:
@@ -188,13 +195,7 @@ def FailGame(this_game):
     sys.exit(0)
 
 def Step(this_game,step_size):
-    this_game.increment()
-    if(this_game.snake.started == True and this_game.snake.should_render(this_game.steps)):
-        this_game.snake.move(step_size)
-        this_game.do_game()
-        ugfx.flush()
-
-
+    this_game.run_step(step_size)
 
 def run_game():
 
@@ -224,8 +225,6 @@ def run_game():
 
 
     this_game = Game(Snake(True,Renderer()),Border(),Food.create_random_food()) 
-
-    # ugfx.box(5, 5, 287, 120, ugfx.BLACK)
 
     ugfx.flush()
 
